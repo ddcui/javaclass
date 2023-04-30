@@ -131,8 +131,7 @@ public class EcoHaus
     {
         private CardLayout hPcards;
         private EcoHausHolder hPeHH;
-        public HomePage(CardLayout hPcardsIn, EcoHausHolder hPeHHIn, NavPage hPnP)
-        {
+        public HomePage(CardLayout hPcardsIn, EcoHausHolder hPeHHIn, NavPage hPnP) {
             setLayout(null);
             setBackground(Color.GREEN);
             hPcards = hPcardsIn;
@@ -149,16 +148,20 @@ public class EcoHaus
             ecoHaus.setFont(homeFont);
             JButton highScores = new JButton("High Scores");
             JButton playButton = new JButton("Play");
+            JButton settingsButton = new JButton("Settings");
             highScores.addActionListener(this);
             playButton.addActionListener(this);
+            settingsButton.addActionListener(this);
             add(highScores);
             add(playButton);
+            add(settingsButton);
 
             hPnP.setBounds(0, 500, 300, 150);
             welcomeTo.setBounds(300, 300, 400, 50);
             ecoHaus.setBounds(325, 350, 200, 50);
             playButton.setBounds(325, 400, 200, 50);
             highScores.setBounds(750, 550, 150, 125);
+            settingsButton.setBounds(50, 550, 150, 125); // Move settings button to the desired position
         }
 
         public void paintComponent(Graphics g)
