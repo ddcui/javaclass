@@ -307,11 +307,11 @@ public class EcoHaus
 			setInstBar.add(sAInP, BorderLayout.SOUTH);
 			setInstBar.add(homePlayBarButton, BorderLayout.CENTER);
 			JLabel setOrInstruct;
-			setOrInstruct.setBackground(Color.YELLOW);
 			if(which)
 				setOrInstruct = new JLabel("Settings");
 			else
 				setOrInstruct = new JLabel("Instructions");
+			setOrInstruct.setBackground(Color.YELLOW);
 			setInstBar.add(setOrInstruct, BorderLayout.NORTH);
 			add(setInstBar, BorderLayout.WEST);
 			JButton setIntAreHere = new JButton("Settings/Instructions");
