@@ -131,7 +131,8 @@ public class EcoHaus
     {
         private CardLayout hPcards;
         private EcoHausHolder hPeHH;
-        public HomePage(CardLayout hPcardsIn, EcoHausHolder hPeHHIn, NavPage hPnP) {
+        public HomePage(CardLayout hPcardsIn, EcoHausHolder hPeHHIn, NavPage hPnP)
+        {
             setLayout(null);
             setBackground(Color.GREEN);
             hPcards = hPcardsIn;
@@ -149,19 +150,36 @@ public class EcoHaus
             JButton highScores = new JButton("High Scores");
             JButton playButton = new JButton("Play");
             JButton settingsButton = new JButton("Settings");
+            JButton exitButton = new JButton("Exit");
+            JButton instructionsButton = new JButton("Instructions");
+            settingsButton.addActionListener(this);
+            exitButton.addActionListener(this);
+            instructionsButton.addActionListener(this);
             highScores.addActionListener(this);
             playButton.addActionListener(this);
-            settingsButton.addActionListener(this);
+
+            JPanel settingsPanel = new JPanel();
+            JPanel exitPanel = new JPanel();
+            JPanel instructionsPanel = new JPanel();
+
+            settingsPanel.add(settingsButton);
+            exitPanel.add(exitButton);
+            instructionsPanel.add(instructionsButton);
+
             add(highScores);
             add(playButton);
-            add(settingsButton);
+            add(settingsPanel);
+            add(exitPanel);
+            add(instructionsPanel);
 
             hPnP.setBounds(0, 500, 300, 150);
             welcomeTo.setBounds(300, 300, 400, 50);
             ecoHaus.setBounds(325, 350, 200, 50);
             playButton.setBounds(325, 400, 200, 50);
             highScores.setBounds(750, 550, 150, 125);
-            settingsButton.setBounds(50, 550, 150, 125); // Move settings button to the desired position
+            settingsPanel.setBounds(0, 0, 100, 50);
+            exitPanel.setBounds(0, 60, 100, 50);
+            instructionsPanel.setBounds(0, 120, 100, 50);
         }
 
         public void paintComponent(Graphics g)
@@ -171,8 +189,11 @@ public class EcoHaus
 
         public void actionPerformed(ActionEvent evt)
         {
-            String homeButtonName = evt.getActionCommand();
-            hPcards.show(hPeHH, homeButtonName);
+            String navButtonName = evt.getActionCommand();
+            if(navButtonName.equals("Exit"))
+                System.exit(1);
+            else
+                hPcards.show(hPeHH, navButtonName);
         }
     }
 
