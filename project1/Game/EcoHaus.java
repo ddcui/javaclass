@@ -407,12 +407,14 @@ class HomePage extends JPanel implements ActionListener
 //Shows the high scores gotten by previous players.
 class HighScorePage extends JPanel implements ActionListener
 {
+    private GetData hSPgD;
 	private CardLayout hSPcards;//Passed in cards. (switch cards)
 	private EcoHausHolder hSPeHH;//Passed in EcoHausHolder. (switch cards)
 	private Scanner highScoreRead;//Reads EcoHighScores
-	public HighScorePage(GetData hSPgD)
+	public HighScorePage(GetData hSPgDin)
 	{
 		setLayout(new BorderLayout());
+        hSPgD = hSPgDin;
 		hSPcards = hSPgD.getCards();
 		hSPeHH = hSPgD.geteHH();
 		JButton backToHome = new JButton("Home");
@@ -425,19 +427,20 @@ class HighScorePage extends JPanel implements ActionListener
 	{
         Font highScoreFont = new Font("Serif", Font.ITALIC, 20);
 		String hSNextLine;
+        hSNextLine = "word";
         int incScore = 0;
 		super.paintComponent(g);
         setFont(highScoreFont);
 		g.drawString("High Scores", 150, 50);
-//        while(highScoreRead.hasNext())
-//        {
+        while(highScoreRead.hasNext())
+        {
             hSNextLine = highScoreRead.nextLine();
-            System.out.println(hSNextLine);
             g.setColor(Color.BLACK);
-            g.drawString(hSNextLine, 150, 100);
-            g.drawRect(150, 100, 10, 10);
-            ++incScore;
-//        }
+             ++incScore;
+        }
+        g.drawString(hSNextLine, 150, 100);
+        g.drawRect(150, 100, 10, 10);
+        highScoreRead = hSPgD.makeScanner("ecoHighScores.txt");
 	}
 
 	public void actionPerformed(ActionEvent evt)
@@ -773,6 +776,17 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                         }
                     }
                 }
+                else if(yearsLeft <= 0)
+                {
+                    Font yearFont = new Font("Dialog", Font.BOLD, 40);
+                    setFont(yearFont);
+                    g.fillRect(0,0,900,900);
+                    g.setColor(Color.YELLOW);
+                    g.drawString("You finished the game with " + gPgD.getEnergy()+".",100, 100);
+                    if(gPgD.getEnergy() < 30)
+                        g.drawString("You couldn't make it to the high scores, however.", 100, 150);
+                    
+                }
                 else
                 {
                     Font yearFont = new Font("Dialog", Font.BOLD, 40);
@@ -784,7 +798,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                 }
             }
         }
-
+/*
         public void creatureEaten()
         {
 			int eatOrganism = 0;
@@ -869,7 +883,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 			creatureX = deathArray(creatureX);
             creatureY = deathArray(creatureY);
 					
-        }
+        }*/
 
         public void amountOfEnergy()
         {
@@ -963,14 +977,14 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                             gPgD.getOrgToAdd() + " " + gPgD.getEnergy());
                             writeScore.close();
                         }
+                        timePass = 1;
+                        repaint();
                     }
                     else
                     {
                         orgsLeft = gPgD.getOrgToAdd();
                         timePass = 200;
-                        creatureEaten();
                         amountOfEnergy();
-                        gPcards.show(gPeHH, "Play");
                     }
                 }
                 yearStr = " " + yearsLeft;
