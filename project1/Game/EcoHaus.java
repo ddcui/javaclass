@@ -1056,13 +1056,11 @@ class QuizPage extends JPanel implements ActionListener
         qPgD = qPgDin;
         scanQuiz = qPgD.makeScanner("ecoQuiz.txt");
         qPbG = new ButtonGroup();
-        questionAnswered = false;
         String quizLine = new String("");
         setLayout(new GridLayout(3,1));
         nextPress = false;
         qPcards = qPgD.getCards();
         qPeHH = qPgD.geteHH();
-        questionAnswered = false;
         setBackground(Color.DARK_GRAY);
         int whichQuestion = (int)(Math.random()*2+1);
         for(int r = 0; r < whichQuestion-1; ++r)
@@ -1150,7 +1148,6 @@ class QuizPage extends JPanel implements ActionListener
                     if(prevButton.equals(correctionNext))
                     {
                         System.out.println("correct!");
-                        questionAnswered = true;
                         rightOrWrong.setText("Correct!");
                         qPgD.addEnergy(3);
                     }
@@ -1168,7 +1165,6 @@ class QuizPage extends JPanel implements ActionListener
                 {
                     System.out.println("Reset!");
                     qPcards.show(qPeHH, "Game");
-                    questionAnswered = false;
                     nextPress = false;
                     scanQuiz = qPgD.makeScanner("ecoQuiz.txt");
                     resetQuiz();
