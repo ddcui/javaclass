@@ -1037,6 +1037,8 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 
 class QuizPage extends JPanel implements ActionListener
 {
+    private JTextField question;
+    private JPanel downPanel;
     private JRadioButton[] answers;//The array with the button for each answer
 	private JTextArea rightOrWrong;//TextArea which displays correct or incorrect.
 	private Scanner scanQuiz;//Read ecoQuiz.txt
@@ -1056,45 +1058,46 @@ class QuizPage extends JPanel implements ActionListener
         qPgD = qPgDin;
         scanQuiz = qPgD.makeScanner("ecoQuiz.txt");
         qPbG = new ButtonGroup();
-        questionAnswered = false;
         String quizLine = new String("");
         setLayout(new GridLayout(3,1));
         nextPress = false;
         qPcards = qPgD.getCards();
         qPeHH = qPgD.geteHH();
-        questionAnswered = false;
         setBackground(Color.DARK_GRAY);
-        int whichQuestion = (int)(Math.random()*2+1);
-        for(int r = 0; r < whichQuestion-1; ++r)
-        {
-            for(int s = 0; s < 7; ++s)
-                scanQuiz.nextLine();
-        }
+        question = new JTextField();
         JPanel quizTop = new JPanel();
         quizTop.setLayout(new BorderLayout());
         next = new JButton("NEXT");
         next.setEnabled(false);
         next.addActionListener(this);
         quizTop.add(next, BorderLayout.NORTH);
-        quizLine = scanQuiz.nextLine();
-        JTextField question = new JTextField(quizLine);
         quizTop.add(question, BorderLayout.CENTER);
-        JPanel downPanel = new JPanel();
-        downPanel.setLayout(new GridLayout(2,2));
-        answers = new JRadioButton[4];
-        for(int r = 0; r < 4; ++r)
-        {
-            quizLine = scanQuiz.nextLine();
-            answers[r] = new JRadioButton(quizLine);
-            answers[r].addActionListener(this);
-            qPbG.add(answers[r]);
-            downPanel.add(answers[r]);
-        }
         rightOrWrong = new JTextArea(5,5);
         rightOrWrong.setLineWrap(true);
         rightOrWrong.setWrapStyleWord(true);
         rightOrWrong.setEditable(false);
         rightOrWrong.setMargin(new Insets(10,10,10,10));
+        downPanel = new JPanel();
+        downPanel.setLayout( new GridLayout(2,2));
+        int whichQuestion = (int)(Math.random()*2+1);
+        while(questionAnswered[whichQuestion] == true)
+                whichQuestion = (int)(Math.random()*2+1);
+        String resetLine;
+        for(int r = 0; r < whichQuestion-1; ++r)
+        {
+            for(int s = 0; s < 7; ++s)
+                scanQuiz.nextLine();
+        }
+        answers = new JRadioButton[4];
+        question.setText(scanQuiz.nextLine());
+        for(int r = 0; r < 4; ++r)
+        {
+            resetLine = scanQuiz.nextLine();
+            answers[r] = new JRadioButton(resetLine);
+            answers[r].addActionListener(this);
+            qPbG.add(answers[r]);
+            downPanel.add(answers[r]);
+        }
         add(quizTop);
         add(rightOrWrong);
         add(downPanel);
@@ -1105,24 +1108,30 @@ class QuizPage extends JPanel implements ActionListener
 		super.paintComponent(g);
 	}
 
-    public void resetQuiz()
+    public JPanel resetQuiz()
     {
+        JPanel otherDownPanel = new JPanel();
+        otherDownPanel.setLayout(new GridLayout(2,2));
         int whichQuestion = (int)(Math.random()*2+1);
-        
+        while(questionAnswered[whichQuestion] == true)
+                whichQuestion = (int)(Math.random()*2+1);
+        String resetLine;
         for(int r = 0; r < whichQuestion-1; ++r)
         {
             for(int s = 0; s < 7; ++s)
                 scanQuiz.nextLine();
         }
         answers = new JRadioButton[4];
-        String resetLine;
+        question.setText(scanQuiz.nextLine());
         for(int r = 0; r < 4; ++r)
         {
             resetLine = scanQuiz.nextLine();
             answers[r] = new JRadioButton(resetLine);
             answers[r].addActionListener(this);
             qPbG.add(answers[r]);
+            otherDownPanel.add(answers[r]);
         }
+        return otherDownPanel;
         
     }
     
@@ -1150,7 +1159,6 @@ class QuizPage extends JPanel implements ActionListener
                     if(prevButton.equals(correctionNext))
                     {
                         System.out.println("correct!");
-                        questionAnswered = true;
                         rightOrWrong.setText("Correct!");
                         qPgD.addEnergy(3);
                     }
@@ -1167,11 +1175,14 @@ class QuizPage extends JPanel implements ActionListener
                 else
                 {
                     System.out.println("Reset!");
-                    qPcards.show(qPeHH, "Game");
-                    questionAnswered = false;
-                    nextPress = false;
                     scanQuiz = qPgD.makeScanner("ecoQuiz.txt");
-                    resetQuiz();
+                    qPcards.show(qPeHH, "Game");
+                    nextPress = false;
+                    next.setEnabled(false);
+                     for(int d = 0; d < 4; ++d)
+                        answers[d].setEnabled(true);
+                    rightOrWrong.setText("");
+                    downPanel = resetQuiz();
                 }
             }
             else
