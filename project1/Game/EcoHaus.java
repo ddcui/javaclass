@@ -407,12 +407,14 @@ class HomePage extends JPanel implements ActionListener
 //Shows the high scores gotten by previous players.
 class HighScorePage extends JPanel implements ActionListener
 {
+    private GetData hSPgD;
 	private CardLayout hSPcards;//Passed in cards. (switch cards)
 	private EcoHausHolder hSPeHH;//Passed in EcoHausHolder. (switch cards)
 	private Scanner highScoreRead;//Reads EcoHighScores
-	public HighScorePage(GetData hSPgD)
+	public HighScorePage(GetData hSPgDin)
 	{
 		setLayout(new BorderLayout());
+        hSPgD = hSPgDin;
 		hSPcards = hSPgD.getCards();
 		hSPeHH = hSPgD.geteHH();
 		JButton backToHome = new JButton("Home");
@@ -429,15 +431,16 @@ class HighScorePage extends JPanel implements ActionListener
 		super.paintComponent(g);
         setFont(highScoreFont);
 		g.drawString("High Scores", 150, 50);
-//        while(highScoreRead.hasNext())
-//        {
+        while(highScoreRead.hasNext())
+        {
             hSNextLine = highScoreRead.nextLine();
             System.out.println(hSNextLine);
             g.setColor(Color.BLACK);
-            g.drawString(hSNextLine, 150, 100);
-            g.drawRect(150, 100, 10, 10);
+            g.drawString(hSNextLine, 150, 100 + (30 * incScore));
             ++incScore;
-//        }
+        }
+        incScore = 0;
+        highScoreRead = hSPgD.makeScanner("ecoHighScores.txt");
 	}
 
 	public void actionPerformed(ActionEvent evt)
@@ -801,9 +804,9 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 					numToEat = 2;
 				if(eatOrganism == 3)
 					whatToEat = false;
-                if(chooseCreature[e] != 0 || chooseCreature[e] != 10000)
+                if(chooseCreature[e] != 0 && chooseCreature[e] != 10000)
                 {
-                    if(whatToEat && speciesNum[0] > 0 || !whatToEat && speciesNum[1] > 0 && speciesNum[2] > 0)
+                    if(whatToEat && speciesNum[0] > 0 || !whatToEat && (speciesNum[1] > 0 || speciesNum[2] > 0))
                     {
                         for(int t = 0; t < numToEat; ++t)
                         {
@@ -1108,30 +1111,28 @@ class QuizPage extends JPanel implements ActionListener
 		super.paintComponent(g);
 	}
 
-    public JPanel resetQuiz()
+    public void resetQuiz()
     {
-        JPanel otherDownPanel = new JPanel();
-        otherDownPanel.setLayout(new GridLayout(2,2));
-        int whichQuestion = (int)(Math.random()*2+1);
+        downPanel.setLayout(new GridLayout(2,2));
+        int whichQuestion = (int)(Math.random()*3+1);
         while(questionAnswered[whichQuestion] == true)
-                whichQuestion = (int)(Math.random()*2+1);
-        String resetLine;
+                whichQuestion = (int)(Math.random()*3+1);
+        System.out.println(whichQuestion + " which");
+        String resetLine = "";
         for(int r = 0; r < whichQuestion-1; ++r)
         {
             for(int s = 0; s < 7; ++s)
                 scanQuiz.nextLine();
         }
-        answers = new JRadioButton[4];
         question.setText(scanQuiz.nextLine());
         for(int r = 0; r < 4; ++r)
         {
             resetLine = scanQuiz.nextLine();
-            answers[r] = new JRadioButton(resetLine);
+            answers[r].setText(resetLine);
             answers[r].addActionListener(this);
             qPbG.add(answers[r]);
-            otherDownPanel.add(answers[r]);
+            downPanel.add(answers[r]);
         }
-        return otherDownPanel;
         
     }
     
@@ -1182,7 +1183,7 @@ class QuizPage extends JPanel implements ActionListener
                      for(int d = 0; d < 4; ++d)
                         answers[d].setEnabled(true);
                     rightOrWrong.setText("");
-                    downPanel = resetQuiz();
+                    resetQuiz();
                 }
             }
             else
