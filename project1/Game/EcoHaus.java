@@ -1373,4 +1373,3 @@ class SetAndInstructPage extends JPanel implements ActionListener, ChangeListene
         valueReader.setText("You will play for "+ evt.getValue() +" years/turns");
     }
 }
-
