@@ -1060,7 +1060,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                     {
                         gPgD.setOrgsLeft();
                         timePass = 200;
-                       // creatureEaten();
+                        creatureEaten();
                         amountOfEnergy();
                         gPcards.show(gPeHH, "Play");
                     }
@@ -1069,6 +1069,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                 yearDisplay.setText(yearStr);
                 orgsStr = " " + gPgD.getOrgsLeft();
                 organismDisplay.setText(orgsStr);
+                repaint();
 			}
 		}
 		public void mouseReleased( MouseEvent evt ){}
@@ -1172,8 +1173,7 @@ class QuizPage extends JPanel implements ActionListener
         downPanel.setLayout( new GridLayout(2,2));
         answers = new JRadioButton[4];
         int whichQuestion = (int)(Math.random()*12+1);
-        while(questionAnswered[whichQuestion] == true)
-                whichQuestion = (int)(Math.random()*12+1);
+        questionAnswered[whichQuestion] = true;
         String resetLine;
         for(int r = 0; r < whichQuestion-1; ++r)
         {
@@ -1206,6 +1206,7 @@ class QuizPage extends JPanel implements ActionListener
         int whichQuestion = (int)(Math.random()*12+1);
         while(questionAnswered[whichQuestion] == true)
                 whichQuestion = (int)(Math.random()*12+1);
+        questionAnswered[whichQuestion] = true;
         System.out.println(whichQuestion + " which");
         String resetLine = "";
         for(int r = 0; r < whichQuestion-1; ++r)
