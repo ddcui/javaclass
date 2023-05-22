@@ -45,15 +45,11 @@ import javax.swing.JScrollBar;
 import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+import javax.swing.BorderFactory;
 
 
 public class EcoHaus
@@ -110,6 +106,8 @@ class EcoHausHolder extends JPanel
 //The data class that, well, stores data.
 class GetData
 {
+    private int orgsLeft;
+	private int originalYears;
 	private CardLayout dataCards;//Holds the cards.
 	private NavPage dataNp;//Holds a Navpage for Game, will change later.
 	private EcoHausHolder dataEcoHausHolder;//Class that holds the cards.
@@ -130,6 +128,8 @@ class GetData
         infoCreature = false;
 		dataGamePlaying = false;
         orgToAdd = 3;
+        orgsLeft = 3;
+        originalYears = 7;
         yearsToPlay = 7;
         name = "Player";
         temp = "t2";
@@ -249,13 +249,39 @@ class GetData
     public void setYearsToPlay(int yearsToPlayIn)
     {
         yearsToPlay = yearsToPlayIn;
+        originalYears = yearsToPlayIn;
     }
+
+    public void subYears()
+    {
+		--yearsToPlay;
+	}
+
+    public int getOriginalYears()
+    {
+		return originalYears;
+	}
     
     public int getYearsToPlay()
     {
         return yearsToPlay;
     }
 
+    public void setOrgsLeft()
+    {
+		orgsLeft = orgToAdd;
+	}
+	
+	public void subOrgs()
+	{
+		--orgsLeft;
+	}
+
+    public int getOrgsLeft()
+	{
+		return orgsLeft;
+	}
+	
     public void addEnergy(int energyIn)
     {
         energy += energyIn;
@@ -427,7 +453,6 @@ class HighScorePage extends JPanel implements ActionListener
 	{
         Font highScoreFont = new Font("Serif", Font.ITALIC, 20);
 		String hSNextLine;
-        hSNextLine = "word";
         int incScore = 0;
 		super.paintComponent(g);
         setFont(highScoreFont);
@@ -435,11 +460,12 @@ class HighScorePage extends JPanel implements ActionListener
         while(highScoreRead.hasNext())
         {
             hSNextLine = highScoreRead.nextLine();
+            System.out.println(hSNextLine);
             g.setColor(Color.BLACK);
-             ++incScore;
+            g.drawString(hSNextLine, 150, 100 + (30 * incScore));
+            ++incScore;
         }
-        g.drawString(hSNextLine, 150, 100);
-        g.drawRect(150, 100, 10, 10);
+        incScore = 0;
         highScoreRead = hSPgD.makeScanner("ecoHighScores.txt");
 	}
 
@@ -454,8 +480,6 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 {
     private String yearStr, orgsStr, energyStr;
     private PrintWriter writeScore;//Write into ecoHighScores.txt
-    private int orgsLeft;//How many organisms left this year?
-    private int yearsLeft;//How many years left before game ends.
     private JTextField nameDisplay;//Receives a name.
     private JTextField energyDisplay;//Displays Player's energy.
     private JTextField organismDisplay;//Displays organisms per year.
@@ -471,8 +495,6 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 		addKeyListener(this);
 		boolean gPgamePlaying = true;
 		gPgD = gPgDin;
-        orgsLeft = gPgD.getOrgToAdd();
-        yearsLeft = gPgD.getYearsToPlay();
 		gPgD.setGamePlaying(gPgamePlaying);
 		gPcards = gPgD.getCards();
 		gPeHH = gPgD.geteHH();
@@ -503,12 +525,8 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
         energyDisplay.setText(energyStr);
         JLabel organismLabel = new JLabel("# of Organisms");
         organismDisplay = new JTextField();
-        orgsStr = " " + orgsLeft;
-        organismDisplay.setText(orgsStr);
         JLabel yearLabel = new JLabel("# of Years");
-        yearDisplay = new JTextField(yearsLeft);
-        yearStr = " " + yearsLeft;
-        yearDisplay.setText(yearStr);
+        yearDisplay = new JTextField(gPgD.getYearsToPlay());
         JLabel nameLabel = new JLabel("Enter your name");
         nameDisplay = new JTextField("...");
         nameDisplay.setEditable(true);
@@ -640,6 +658,10 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 		//and drawing their image on that spot instead.
 		public void paintComponent(Graphics g)
 		{
+            orgsStr = " " + gPgD.getOrgsLeft();
+			organismDisplay.setText(orgsStr);
+			yearStr = " " + gPgD.getYearsToPlay();;
+			yearDisplay.setText(yearStr);
 			super.paintComponent(g);
             gTemp = gPgD.getTemp();
             gHumid = gPgD.getHumidity();
@@ -676,12 +698,16 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                 }
                 else if(which.equals(orgNames[2]))
                 {
-/*                  g.drawImage();
-                    g.drawString();
-                    g.drawString();
-                    g.drawString();
-                    g.drawString();
-                    g.drawString();*/
+                    g.drawImage(allOrgs[2], 600, 0, 100, 100, this);
+                    g.drawString("Muskrat", 100, 100);
+                    g.drawString("Kingdom: Animalia", 100, 100);
+                    g.drawString("Familly: Cricetidae", 100, 140);
+                    g.drawString("Muskrats are referred to as rats "+
+                        "as they are medium sized rodents.", 100, 180);
+                    g.drawString("They are not related to rats or the"+
+                        " similar beavers, though.", 100, 220);
+                    g.drawString("Herbivore in the food chain", 100, 260);
+                    g.drawString("Not eaten by anything", 100, 300);
                 }
                 else if(which.equals(orgNames[3]))
                 {
@@ -690,13 +716,13 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                     g.drawString("Kingdom: Animalia", 100, 140);
                     g.drawString("Familly: Mustelidae", 100, 180);
                     g.drawString("The largest land-dwelling species of"+
-                        " the family Mustelidae, this species is mainly"
+                        " the family Mustelidae, "
                         , 100, 220);
-                    g.drawString("a scavenger, but it can kill prey " +
-                        "like deer that are many times it's size.",
-                        100, 260);
-                    g.drawString("Carnivore in the food chain", 100, 300);
-                    g.drawString("Not eaten by anything", 100, 340);
+                    g.drawString(", this species is mainly a scavenger,"
+                        + "but it can kill prey ", 100, 260);
+                    g.drawString("like deer that are many times it's size.", 100, 300);
+                    g.drawString("Carnivore in the food chain", 100, 340);
+                    g.drawString("Not eaten by anything", 100, 380);
                 }
             }
             else
@@ -708,84 +734,70 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                 yTop = this.getHeight() - 50;
                 if(timePass == 0)
                 {
-                    if(gHumid.substring(1,2).equals("1"))
+                    if(gHumid.equals("h1"))
                     {
                         g.setColor(Color.ORANGE);
                         g.fillRect(0, 170, 800, 200);
                     }
-                    else if(gHumid.substring(1,2).equals("2") || gHumid.substring(1,2).equals("3"))
+                    else if(gHumid.equals("h2") || gHumid.equals("h3"))
                     {
 						g.setColor(Color.CYAN);
                         for(int w = 0; w < 16; ++w)
                         {
                             g.drawLine(50*w, 0, 50*w, 200);
                         }
-                        if(gHumid.substring(1,2).equals("3"))
+                        if(gHumid.equals("h3"))
                         {
                             g.setColor(Color.LIGHT_GRAY);
                             g.fillRect(0, 170, 800, 30);
                         }
                     }
- /*                 if(gTemp.subString(1,2).equals("1"))
+                    if(gTemp.equals("t1"))
                     {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(0, 200, 800, 300);
                     }
-                    else if()
+                    else if(gTemp.equals("t3"))
                     {
+                        g.setColor(Color.YELLOW);
+                        g.fillRect(0, 170, 800, 20);
                     }
+                    g.setColor(Color.YELLOW);
+                    if(gSun.substring(1,2).equals("1"))
+                        g.fillOval(700, 100, 50, 50);
+                    else if(gSun.substring(1,2).equals("2"))
+                         g.fillOval(550, 70, 50, 50);
                     else
-                    {
-                    }
-                    if()
-                    {
-                    }
-                    else if()
-                    {
-                    }
-                    else
-                    {
-                    }*/
+                        g.fillOval(400, 40, 50, 50);
                     for(int x = 0; x < numOfOrgs; ++x)
                     {
                         if(chooseCreature[x] != 0)
                         {
-                        moveCreature = (int)(Math.random()*3+0);
-                        if(moveCreature == 1)
-                           creatureX[x]+=3;
-                        else if(moveCreature == 2)
-                            creatureX[x]-=3;
-                        moveCreature = (int)(Math.random()*3+0);
-                        if(moveCreature == 1)
-                             creatureY[x]+=3;
-                        else if(moveCreature == 2)
-                             creatureY[x]-=3;
-                        if(creatureX[x] >= xTop)
-                            creatureX[x] = xTop;
-                        if(creatureX[x] <= xLow)
-                            creatureX[x] = xLow;
-                        if(creatureY[x] >= yTop)
-                            creatureY[x] = yTop;
-                        if(creatureY[x] <= yLow)
-                            creatureY[x] = yLow;
+                            moveCreature = (int)(Math.random()*3+0);
+                            if(moveCreature == 1)
+                               creatureX[x]+=3;
+                            else if(moveCreature == 2)
+                                creatureX[x]-=3;
+                            moveCreature = (int)(Math.random()*3+0);
+                            if(moveCreature == 1)
+                                 creatureY[x]+=3;
+                            else if(moveCreature == 2)
+                                 creatureY[x]-=3;
+                            if(creatureX[x] >= xTop)
+                                creatureX[x] = xTop;
+                            if(creatureX[x] <= xLow)
+                                creatureX[x] = xLow;
+                            if(creatureY[x] >= yTop)
+                                creatureY[x] = yTop;
+                            if(creatureY[x] <= yLow)
+                                creatureY[x] = yLow;
                         }
                     }
                     for(int y = 0; y < numOfOrgs; ++y)
                     {
                         if(chooseCreature[y] != 10000)
-                        {
                             g.drawImage(allOrgs[chooseCreature[y]], creatureX[y], creatureY[y],50, 50, this);
-                        }
                     }
-                }
-                else if(yearsLeft <= 0)
-                {
-                    Font yearFont = new Font("Dialog", Font.BOLD, 40);
-                    setFont(yearFont);
-                    g.fillRect(0,0,900,900);
-                    g.setColor(Color.YELLOW);
-                    g.drawString("You finished the game with " + gPgD.getEnergy()+".",100, 100);
-                    if(gPgD.getEnergy() < 30)
-                        g.drawString("You couldn't make it to the high scores, however.", 100, 150);
-                    
                 }
                 else
                 {
@@ -793,31 +805,86 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                     setFont(yearFont);
                     g.fillRect(0,0,900,900);
                     g.setColor(Color.YELLOW);
-                    g.drawString("Year " + (gPgD.getYearsToPlay() - yearsLeft),100, 100);
+                    g.drawString("Year " + (gPgD.getOriginalYears() - gPgD.getYearsToPlay()),100, 100);
                     --timePass;
                 }
             }
         }
-/*
+
+        public void goodWeather()
+        {
+            int randX, randY;
+            if(numOfOrgs == (creatureX.length - 4))
+            {
+                creatureX = getArray(creatureX);
+                creatureY = getArray(creatureY);
+                chooseCreature = getArray(chooseCreature);
+            }
+            if(gSun.equals("s3") && gHumid.equals("h3") && gTemp.equals("t3"))
+            {
+                ++numOfOrgs;
+                chooseCreature[numOfOrgs] = 0;
+                ++speciesNum[0];
+                randX = (int)(Math.random()*(this.getWidth() - 50)+50);
+                creatureX[numOfOrgs] = randX;
+                randY = (int)(Math.random()*(this.getHeight() - 50)+50);
+                creatureY[numOfOrgs] = randY;
+                System.out.println(creatureX[numOfOrgs] + " " + creatureY[numOfOrgs]);
+            }
+            if(gSun.equals("s3") && gHumid.equals("h1") && gTemp.equals("t3"))
+            {
+                ++numOfOrgs;
+                chooseCreature[numOfOrgs] = 1;
+                ++speciesNum[1];
+                randX = (int)(Math.random()*(this.getWidth() - 50)+50);
+                creatureX[numOfOrgs] = randX;
+                randY = (int)(Math.random()*(this.getHeight() - 50)+50);
+                creatureY[numOfOrgs] = randY;
+            }
+            if(gSun.equals("s2") && gHumid.equals("h3") && gTemp.equals("t2"))
+            {
+                ++numOfOrgs;
+                chooseCreature[numOfOrgs] = 2;
+                ++speciesNum[2];
+                randX = (int)(Math.random()*(this.getWidth() - 50)+50);
+                creatureX[numOfOrgs] = randX;
+                randY = (int)(Math.random()*(this.getHeight() - 50)+50);
+                creatureY[numOfOrgs] = randY;
+            }
+            if(gSun.equals("s1") && gHumid.equals("h2") && gTemp.equals("t1"))
+            {
+                ++numOfOrgs;
+                chooseCreature[numOfOrgs] = 3;
+                ++speciesNum[3];
+                randX = (int)(Math.random()*(this.getWidth() - 50)+50);
+                creatureX[numOfOrgs] = randX;
+                randY = (int)(Math.random()*(this.getHeight() - 50)+50);
+                creatureY[numOfOrgs] = randY;
+            }
+        }
+
         public void creatureEaten()
         {
+            int eatingOrganism = 0;
 			int eatOrganism = 0;
 			int deathIndex = 0;
 			int countUp = 0;
 			int numToEat = 0;
 			boolean whatToEat = true;
+            for(int c = 0; c < numOfOrgs; ++c)
+                System.out.println(chooseCreature[c]);
 			for(int e = 0; e < numOfOrgs; ++e)
 			{
                 System.out.println("Switch creature");
 				numToEat = 1;
-				eatOrganism = chooseCreature[e];
-				if(eatOrganism == 1)
+				eatingOrganism = chooseCreature[e];
+				if(eatingOrganism == 1)
 					numToEat = 2;
-				if(eatOrganism == 3)
+				if(eatingOrganism == 3)
 					whatToEat = false;
-                if(chooseCreature[e] != 0 || chooseCreature[e] != 10000)
+                if(chooseCreature[e] != 0 && chooseCreature[e] != 10000)
                 {
-                    if(whatToEat && speciesNum[0] > 0 || !whatToEat && speciesNum[1] > 0 && speciesNum[2] > 0)
+                    if(whatToEat && speciesNum[0] > 0 || !whatToEat && (speciesNum[1] > 0 || speciesNum[2] > 0))
                     {
                         for(int t = 0; t < numToEat; ++t)
                         {
@@ -828,7 +895,9 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                                 eatOrganism = (int)(Math.random()*(speciesNum[1]+speciesNum[2])+1);
                             while(!(countUp == eatOrganism))
                             {
-                                System.out.println("Find creature " + countUp + " " + eatOrganism + " " + deathIndex);
+                                System.out.println("Find creature " + 
+                                countUp + " " + eatOrganism + " " +
+                                deathIndex + " " + chooseCreature[deathIndex]);
                                 if(countUp == (creatureX.length - 1))
                                 {
                                     creatureX = getArray(creatureX);
@@ -840,7 +909,6 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                                     if(chooseCreature[deathIndex] == 0)
                                         ++countUp;
                                     ++deathIndex;
-                                        
                                 }
                                 else
                                 {
@@ -849,7 +917,18 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                                     ++deathIndex;
                                 }
                             }
+                            --deathIndex;
+                            whatToEat = true;
+                            System.out.println(eatingOrganism + " ate " + chooseCreature[deathIndex]);
                             countUp = 0;
+                            if(chooseCreature[deathIndex] == 0)
+                                --speciesNum[0];
+                            else if(chooseCreature[deathIndex] == 1)
+                                --speciesNum[1];
+                            else if(chooseCreature[deathIndex] == 2)
+                                --speciesNum[2];
+                            else if(chooseCreature[deathIndex] == 3)
+                                --speciesNum[3];
                             chooseCreature[deathIndex] = 10000;
                             creatureX[deathIndex] = 10000;
                             creatureY[deathIndex] = 10000;
@@ -859,6 +938,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                     }
                     else
                     {
+                        System.out.println("Starved to death");
                          chooseCreature[e] = 10000;
                          creatureX[e] = 10000;
                          creatureY[e] = 10000;
@@ -883,7 +963,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 			creatureX = deathArray(creatureX);
             creatureY = deathArray(creatureY);
 					
-        }*/
+        }
 
         public void amountOfEnergy()
         {
@@ -963,35 +1043,36 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 					chooseCreature[numOfOrgs] = 3;
 					++speciesNum[3];
 				}
-				numOfOrgs += 1;
-                orgsLeft -= 1;
-                if(orgsLeft <= 0)
+				gPgD.subOrgs();
+                if(gPgD.getOrgsLeft() <= 0)
                 {
-                    yearsLeft-=1;
-                    if(yearsLeft <= 0)
+                    gPgD.subYears();
+                    if(gPgD.getYearsToPlay() <= 0)
                     {
-                        if(gPgD.getEnergy() > 30)
+                        if(gPgD.getEnergy() > 10)
                         {
                             writeScore.println(gPgD.catchName()+ " " +
                             gPgD.getYearsToPlay() + " " +
                             gPgD.getOrgToAdd() + " " + gPgD.getEnergy());
                             writeScore.close();
                         }
-                        timePass = 1;
-                        repaint();
                     }
                     else
                     {
-                        orgsLeft = gPgD.getOrgToAdd();
+                        gPgD.setOrgsLeft();
                         timePass = 200;
+                        goodWeather();
+                        creatureEaten();
                         amountOfEnergy();
+                        gPcards.show(gPeHH, "Play");
                     }
                 }
-                yearStr = " " + yearsLeft;
+                yearStr = " " + gPgD.getYearsToPlay();
                 yearDisplay.setText(yearStr);
-                orgsStr = " " + orgsLeft;
+                orgsStr = " " + gPgD.getOrgsLeft();
                 organismDisplay.setText(orgsStr);
-				repaint();
+                ++numOfOrgs;
+                repaint();
 			}
 		}
 		public void mouseReleased( MouseEvent evt ){}
@@ -1051,6 +1132,8 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 
 class QuizPage extends JPanel implements ActionListener
 {
+    private JTextField question;
+    private JPanel downPanel;
     private JRadioButton[] answers;//The array with the button for each answer
 	private JTextArea rightOrWrong;//TextArea which displays correct or incorrect.
 	private Scanner scanQuiz;//Read ecoQuiz.txt
@@ -1076,37 +1159,39 @@ class QuizPage extends JPanel implements ActionListener
         qPcards = qPgD.getCards();
         qPeHH = qPgD.geteHH();
         setBackground(Color.DARK_GRAY);
-        int whichQuestion = (int)(Math.random()*2+1);
-        for(int r = 0; r < whichQuestion-1; ++r)
-        {
-            for(int s = 0; s < 7; ++s)
-                scanQuiz.nextLine();
-        }
+        question = new JTextField();
         JPanel quizTop = new JPanel();
         quizTop.setLayout(new BorderLayout());
         next = new JButton("NEXT");
         next.setEnabled(false);
         next.addActionListener(this);
         quizTop.add(next, BorderLayout.NORTH);
-        quizLine = scanQuiz.nextLine();
-        JTextField question = new JTextField(quizLine);
         quizTop.add(question, BorderLayout.CENTER);
-        JPanel downPanel = new JPanel();
-        downPanel.setLayout(new GridLayout(2,2));
-        answers = new JRadioButton[4];
-        for(int r = 0; r < 4; ++r)
-        {
-            quizLine = scanQuiz.nextLine();
-            answers[r] = new JRadioButton(quizLine);
-            answers[r].addActionListener(this);
-            qPbG.add(answers[r]);
-            downPanel.add(answers[r]);
-        }
         rightOrWrong = new JTextArea(5,5);
         rightOrWrong.setLineWrap(true);
         rightOrWrong.setWrapStyleWord(true);
         rightOrWrong.setEditable(false);
         rightOrWrong.setMargin(new Insets(10,10,10,10));
+        downPanel = new JPanel();
+        downPanel.setLayout( new GridLayout(2,2));
+        answers = new JRadioButton[4];
+        int whichQuestion = (int)(Math.random()*12+1);
+        questionAnswered[whichQuestion] = true;
+        String resetLine;
+        for(int r = 0; r < whichQuestion-1; ++r)
+        {
+            for(int s = 0; s < 7; ++s)
+                scanQuiz.nextLine();
+        }
+        question.setText(scanQuiz.nextLine());
+        for(int r = 0; r < 4; ++r)
+        {
+            resetLine = scanQuiz.nextLine();
+            answers[r] = new JRadioButton(resetLine);
+            answers[r].addActionListener(this);
+            qPbG.add(answers[r]);
+            downPanel.add(answers[r]);
+        }
         add(quizTop);
         add(rightOrWrong);
         add(downPanel);
@@ -1119,21 +1204,27 @@ class QuizPage extends JPanel implements ActionListener
 
     public void resetQuiz()
     {
-        int whichQuestion = (int)(Math.random()*2+1);
-        
+        qPbG.clearSelection();
+        downPanel.setLayout(new GridLayout(2,2));
+        int whichQuestion = (int)(Math.random()*12+1);
+        while(questionAnswered[whichQuestion] == true)
+                whichQuestion = (int)(Math.random()*12+1);
+        questionAnswered[whichQuestion] = true;
+        System.out.println(whichQuestion + " which");
+        String resetLine = "";
         for(int r = 0; r < whichQuestion-1; ++r)
         {
             for(int s = 0; s < 7; ++s)
                 scanQuiz.nextLine();
         }
-        answers = new JRadioButton[4];
-        String resetLine;
+        question.setText(scanQuiz.nextLine());
         for(int r = 0; r < 4; ++r)
         {
             resetLine = scanQuiz.nextLine();
-            answers[r] = new JRadioButton(resetLine);
+            answers[r].setText(resetLine);
             answers[r].addActionListener(this);
             qPbG.add(answers[r]);
+            downPanel.add(answers[r]);
         }
         
     }
@@ -1178,9 +1269,13 @@ class QuizPage extends JPanel implements ActionListener
                 else
                 {
                     System.out.println("Reset!");
+                    scanQuiz = qPgD.makeScanner("ecoQuiz.txt");
                     qPcards.show(qPeHH, "Game");
                     nextPress = false;
-                    scanQuiz = qPgD.makeScanner("ecoQuiz.txt");
+                    next.setEnabled(false);
+                     for(int d = 0; d < 4; ++d)
+                        answers[d].setEnabled(true);
+                    rightOrWrong.setText("");
                     resetQuiz();
                 }
             }
@@ -1370,6 +1465,8 @@ class SetAndInstructPage extends JPanel implements ActionListener, ChangeListene
     public void adjustmentValueChanged(AdjustmentEvent evt)
     {
         sAIgD.setOrgToAdd(evt.getValue());
+        sAIgD.setOrgsLeft();
         valueReader.setText("You will play for "+ evt.getValue() +" years/turns");
     }
+
 }
