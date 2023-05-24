@@ -106,6 +106,7 @@ class EcoHausHolder extends JPanel
 //The data class that, well, stores data.
 class GetData
 {
+    private boolean tempChanging;
     private boolean response;
     private int orgsLeft;
 	private int originalYears;
@@ -116,7 +117,7 @@ class GetData
 	private boolean addCreature;//If the user is adding a creature.
 	private String whichCreature;//Has the creature's name to show which.
 	private boolean infoCreature;//If the user is looking for information on creature.
-    private String temp;//What button in temperature Panel is pressed?
+    private String temp;//Shows what level temperaature is.
     private String humid;
     private String sunlight;
     private int orgToAdd;//How many organisms can you add before year skips?
@@ -126,6 +127,7 @@ class GetData
 
 	public GetData()
 	{
+        tempChanging = false;
 		response = false;
         infoCreature = false;
 		dataGamePlaying = false;
@@ -313,6 +315,16 @@ class GetData
 	{
 		return response;
 	}
+
+    public void setTempChanging(boolean tempChangingIn)
+    {
+        tempChanging = tempChangingIn;
+    }
+
+    public boolean getTempChanging()
+    {
+        return tempChanging;
+    }
     
     public Scanner makeScanner(String scanName)
 	{
@@ -410,11 +422,8 @@ class HomePage extends JPanel implements ActionListener
 		Font homeFont = new Font("Serif", Font.ITALIC, 50);
 		JLabel welcomeTo = new JLabel("Welcome to");
 		JLabel ecoHaus = new JLabel("Ecohaus");
-		NavPage hPnP = new NavPage(hPcards, hPeHH); //NavPage hPnP = hPgD.getNP();
-		//~ JPanel hPnPholder = new JPanel();
-		//~ hPnPholder.setBackground(Color.ORANGE);
-		//~ hPnPholder.add(hPnP);
-		add(hPnP);//holder);
+		NavPage hPnP = new NavPage(hPcards, hPeHH);
+		add(hPnP);
 		add(welcomeTo);
 		add(ecoHaus);
 
@@ -496,7 +505,7 @@ class HighScorePage extends JPanel implements ActionListener
 //Plays the game, uses keyboard to return back home.
 class GamePage extends JPanel implements ActionListener, MouseListener, KeyListener
 {
-	private boolean tempChanging;
+    private JTextField humidField, sunField, tempField;
     private String yearStr, orgsStr, energyStr;
     private PrintWriter writeScore;//Write into ecoHighScores.txt
     private JTextField nameDisplay;//Receives a name.
@@ -516,6 +525,9 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
         
 		boolean gPgamePlaying = true;
         natDisaster = new JTextField();
+        tempField = new JTextField();
+        humidField = new JTextField();
+        sunField = new JTextField();
 		gPgD = gPgDin;
 		gPgD.setGamePlaying(gPgamePlaying);
 		gPcards = gPgD.getCards();
@@ -532,6 +544,16 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 		JPanel upperSection = new JPanel();
 		upperSection.setLayout(new BorderLayout());
 		upperSection.add(gPtP, BorderLayout.EAST);
+        JLabel pressX = new JLabel("Press the screen and x to go home.");
+        JPanel pressXholder = new JPanel();
+        pressXholder.add(pressX);
+        JPanel condHolder = new JPanel();
+        condHolder.setLayout(new GridLayout(3,1));
+        condHolder.add(tempField);
+        condHolder.add(humidField);
+        condHolder.add(sunField);
+        upperSection.add(pressXholder, BorderLayout.SOUTH);
+        upperSection.add(condHolder, BorderLayout.CENTER);
 		add(upperSection, BorderLayout.NORTH);
         
 		JPanel mainGamePanel = new JPanel();
@@ -658,7 +680,6 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 			addMouseListener(this);
 			addMouseMotionListener(this);
 			randSuggest = (int)(Math.random()*4+1);
-			tempChanging = false;
 			gMFgD = gMFgDin;
             speciesNum = new int[]{0,0,0,0};
 			allOrgs = new Image[5];
@@ -697,10 +718,18 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 		//and drawing their image on that spot instead.
 		public void paintComponent(Graphics g)
 		{
+            String humidString = " Humidity: " + gHumid;
+            humidField.setText(humidString);
+            String sunString = " Sunlight: " + gSun;
+            sunField.setText(sunString);
+            String tempString = " Temperature: " + gTemp;
+            tempField.setText(tempString);
             orgsStr = " " + gPgD.getOrgsLeft();
 			organismDisplay.setText(orgsStr);
 			yearStr = " " + gPgD.getYearsToPlay();;
 			yearDisplay.setText(yearStr);
+            energyStr = " " + gPgD.getEnergy();
+            energyDisplay.setText(energyStr);
 			super.paintComponent(g);
             gTemp = gPgD.getTemp();
             gHumid = gPgD.getHumidity();
@@ -959,20 +988,23 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 			{
                 System.out.println("Switch creature");
 				numToEat = 1;
-				/*
-				while()
-				{
-				* if(chooseCreature[eatIndex] == speciesEat)
-				* ++eatIndex;
-				}
-				* 
-				*/
-				eatingOrganism = chooseCreature[e];
+/*				while(chooseCreature[eatIndex] == speciesEat)
+                     ++eatIndex;
+                ++eatUp;
+                eatingOrganism = chooseCreature[eatIndex];
+                System.out.println(eatingOrganism);
+                if(eatUp == speciesNum[speciesEat])
+                {
+                    eatUp = 0;
+                    eatIndex = 0;
+                    ++speciesEat;
+                }*/
+                eatingOrganism = chooseCreature[e];
 				if(eatingOrganism == 1)
 					numToEat = 2;
 				if(eatingOrganism == 3)
 					whatToEat = false;
-                if(chooseCreature[e] != 0 && chooseCreature[e] != 10000)
+                if(chooseCreature[eatingOrganism] != 0 && chooseCreature[eatingOrganism] != 10000)
                 {
                     if(whatToEat && speciesNum[0] > 0 || !whatToEat && (speciesNum[1] > 0 || speciesNum[2] > 0))
                     {
@@ -1032,13 +1064,13 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                          chooseCreature[e] = 10000;
                          creatureX[e] = 10000;
                          creatureY[e] = 10000;
-                         if(gMFgD.getWhichCreature().equals("wildGrass.jpg"))
+                         if(eatingOrganism == 0)
                             --speciesNum[0];
-                         else if(gMFgD.getWhichCreature().equals("antelope.jpg"))
+                         else if(eatingOrganism == 1)
                             --speciesNum[1];
-                         else if(gMFgD.getWhichCreature().equals("muskrat.jpg"))
+                         else if(eatingOrganism == 2)
                             --speciesNum[2];
-                         else if(gMFgD.getWhichCreature().equals("wolverine.jpg"))
+                         else if(eatingOrganism == 3)
                             --speciesNum[3];
                          ++numDead;
                         for(int x = 0; x < speciesNum.length; ++x)
@@ -1184,7 +1216,7 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
                         goodWeather();
                         creatureEaten();
                         amountOfEnergy();
-                        tempChanging = false;
+                        gPgD.setTempChanging(false);
                         gPcards.show(gPeHH, "Play");
                     }
                 }
@@ -1248,91 +1280,6 @@ class GamePage extends JPanel implements ActionListener, MouseListener, KeyListe
 			gPgD.setWhichCreature(organismName + ".jpg");
 		}
 	}
-
-    //Allows the user to change temperature.(Not working on)
-    class TemperaturePage extends JPanel implements ActionListener
-    {
-        private ButtonGroup tempGroup, sunGroup, humidGroup;
-        private JButton[] pressTemp, pressSun, pressHumid;
-        private int tempNow, humidNow, sunNow;//The current int for each condition.
-        private GetData tPgD;//The GetData object.
-        public TemperaturePage(GetData tPgDin)
-        {
-            pressTemp = pressSun = pressHumid = new JButton[3];
-            tempGroup = sunGroup = humidGroup = new ButtonGroup();
-            tempNow = humidNow = sunNow = 1;
-            tPgD = tPgDin;
-            setBackground(Color.MAGENTA);
-             setLayout( new GridLayout(4,1));
-            JLabel conditionTitle = new JLabel("Conditions");
-            JPanel temperature = makeConditions("temperature", pressTemp, tempGroup);
-            JPanel humidity = makeConditions("humidity", pressHumid, humidGroup);
-            JPanel sunlight = makeConditions("sunlight", pressSun, sunGroup);
-            add(conditionTitle);
-            add(temperature);
-            add(humidity);
-            add(sunlight);
-        }
-        public void paintComponent(Graphics g)
-        {
-            super.paintComponent(g);
-        }
-
-        //Makes each panel for TemperaturePage, creates buttons and sets
-        //Listeners, adds buttons to panel, etc.
-        public JPanel makeConditions(String condIn, JButton[] pressCond, ButtonGroup condGroup)
-        {
-            String condInLetter = condIn.substring(0,1);
-            JPanel condPanel = new JPanel();
-            condPanel.setLayout( new GridLayout(1,4));
-            JLabel condLabel = new JLabel(condIn);
-            condPanel.add(condLabel);
-            for(int i = 0; i < 3; ++i)
-            {
-                pressCond[i] = new JButton(condInLetter + (i + 1));
-                pressCond[i].addActionListener(this);
-                if(i == 1)
-                    pressCond[i].setForeground(Color.GREEN);
-                condGroup.add(pressCond[i]);
-                condPanel.add(pressCond[i]);
-            }
-            return condPanel;
-        }
-
-        public void actionPerformed(ActionEvent evt)
-        {
-			if(!tempChanging)
-			{
-				tempChanging = true;
-				gPgD.subOrgs();
-				organismDisplay.setText(" " + gPgD.getOrgsLeft());
-			}
-            String condButtonName = evt.getActionCommand();
-            if(condButtonName.substring(0,1).equals("t"))
-            {
-                pressTemp[tempNow].setForeground(Color.BLACK);
-                tempNow = Integer.parseInt(condButtonName.substring(1,2))-1;
-                tPgD.setTemp(condButtonName);
-                pressTemp[tempNow].setForeground(Color.GREEN);
-            }    
-            else if(condButtonName.substring(0,1).equals("h"))
-            {
-                pressHumid[humidNow].setForeground(Color.BLACK);
-                humidNow = Integer.parseInt(condButtonName.substring(1,2))-1;
-                tPgD.setHumidity(condButtonName);
-                pressHumid[humidNow].setForeground(Color.GREEN);
-            }
-            else
-            {
-                pressSun[sunNow].setForeground(Color.BLACK);
-                sunNow = Integer.parseInt(condButtonName.substring(1,2))-1;
-                tPgD.setSunlight(condButtonName);
-                pressSun[sunNow].setForeground(Color.GREEN);
-             }
-            repaint();
-       }
-
-}
 	   
 }
 
@@ -1501,6 +1448,81 @@ class QuizPage extends JPanel implements ActionListener
 	}
 }
 
+//Allows the user to change temperature.(Not working on)
+class TemperaturePage extends JPanel implements ActionListener
+{
+        private ButtonGroup tempGroup, sunGroup, humidGroup;
+        private JButton[] pressTemp, pressSun, pressHumid;
+        private int tempNow, humidNow, sunNow;//The current int for each condition.
+        private GetData tPgD;//The GetData object.
+        public TemperaturePage(GetData tPgDin)
+        {
+            pressTemp = pressSun = pressHumid = new JButton[3];
+            tempGroup = sunGroup = humidGroup = new ButtonGroup();
+            tempNow = humidNow = sunNow = 1;
+            tPgD = tPgDin;
+            setBackground(Color.MAGENTA);
+             setLayout( new GridLayout(4,1));
+            JLabel conditionTitle = new JLabel("Conditions");
+            JPanel temperature = makeConditions("temperature", pressTemp, tempGroup);
+            JPanel humidity = makeConditions("humidity", pressHumid, humidGroup);
+            JPanel sunlight = makeConditions("sunlight", pressSun, sunGroup);
+            add(conditionTitle);
+            add(temperature);
+            add(humidity);
+            add(sunlight);
+        }
+        public void paintComponent(Graphics g)
+        {
+            super.paintComponent(g);
+        }
+
+        //Makes each panel for TemperaturePage, creates buttons and sets
+        //Listeners, adds buttons to panel, etc.
+        public JPanel makeConditions(String condIn, JButton[] pressCond, ButtonGroup condGroup)
+        {
+            String condInLetter = condIn.substring(0,1);
+            JPanel condPanel = new JPanel();
+            condPanel.setLayout( new GridLayout(1,4));
+            JLabel condLabel = new JLabel(condIn);
+            condPanel.add(condLabel);
+            for(int i = 0; i < 3; ++i)
+            {
+                pressCond[i] = new JButton(condInLetter + (i + 1));
+                pressCond[i].addActionListener(this);
+                condGroup.add(pressCond[i]);
+                condPanel.add(pressCond[i]);
+            }
+            return condPanel;
+        }
+
+        public void actionPerformed(ActionEvent evt)
+        {
+			if(!tPgD.getTempChanging())
+			{
+				tPgD.setTempChanging(true);
+				tPgD.subOrgs();
+			}
+            String condButtonName = evt.getActionCommand();
+            if(condButtonName.substring(0,1).equals("t"))
+            {
+                tempNow = Integer.parseInt(condButtonName.substring(1,2))-1;
+                tPgD.setTemp(condButtonName);
+            }    
+            else if(condButtonName.substring(0,1).equals("h"))
+            {
+                humidNow = Integer.parseInt(condButtonName.substring(1,2))-1;
+                tPgD.setHumidity(condButtonName);
+            }
+            else
+            {
+                sunNow = Integer.parseInt(condButtonName.substring(1,2))-1;
+                tPgD.setSunlight(condButtonName);
+             }
+       }
+
+}
+
 //Settings and Instructions at the same time, creates buttons for nav
 //on left and chooses between settings/instructions on right.
 class SetAndInstructPage extends JPanel implements ActionListener, ChangeListener, AdjustmentListener
@@ -1542,7 +1564,7 @@ class SetAndInstructPage extends JPanel implements ActionListener, ChangeListene
 		{
 			 setOrInstruct = new JLabel("Settings");
 			 setIntAreHere = new JPanel();
-             setIntAreHere.setLayout(new GridLayout(2,2));
+             setIntAreHere.setLayout(new GridLayout(3,2));
              
              JLabel setYears = new JLabel("# of years to play");
              setIntAreHere.add(setYears);
@@ -1560,15 +1582,18 @@ class SetAndInstructPage extends JPanel implements ActionListener, ChangeListene
              orgBarHolder.setLayout(new BorderLayout());
              JScrollBar orgBar = new JScrollBar(JScrollBar.HORIZONTAL, 3, 1, 1, 5);
              orgBar.addAdjustmentListener(this);
-             
              JPanel valueHolder = new JPanel();
              valueReader = new JTextField();
              valueReader.setEnabled(false);
              valueHolder.add(valueReader);
-             
              orgBarHolder.add(orgBar, BorderLayout.NORTH);
              orgBarHolder.add(valueReader, BorderLayout.CENTER);
              setIntAreHere.add(orgBarHolder);
+
+             JLabel setCond = new JLabel("Set beginning conditions");
+             setIntAreHere.add(setCond);
+             TemperaturePage sAItP = new TemperaturePage(sAIgD);
+             setIntAreHere.add(sAItP);
 			 add(setIntAreHere, BorderLayout.CENTER);
 		}
 		else
